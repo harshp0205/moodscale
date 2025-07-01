@@ -253,23 +253,212 @@ Built with modern design principles using:
 
 ## 🚀 Deployment
 
-### Frontend (Vercel/Netlify)
-```bash
-npm run build
-# Deploy dist/ folder
-```
+### Frontend Deployment (Vercel - Recommended)
 
-### Backend (Railway/Heroku)
-```bash
-npm run build
-# Deploy with start script
-```
+1. **Prepare for Production**
+   ```bash
+   cd frontend
+   npm run build
+   ```
 
-### Environment Variables
+2. **Deploy to Vercel**
+   ```bash
+   # Install Vercel CLI
+   npm install -g vercel
+   
+   # Login and deploy
+   vercel login
+   vercel --prod
+   ```
+
+3. **Vercel Configuration** (create `vercel.json` in frontend folder)
+   ```json
+   {
+     "buildCommand": "npm run build",
+     "outputDirectory": "dist",
+     "framework": "vite",
+     "env": {
+       "VITE_API_URL": "@api_url"
+     }
+   }
+   ```
+
+### Frontend Deployment (Netlify Alternative)
+
+1. **Build the project**
+   ```bash
+   cd frontend
+   npm run build
+   ```
+
+2. **Deploy via Netlify CLI**
+   ```bash
+   # Install Netlify CLI
+   npm install -g netlify-cli
+   
+   # Login and deploy
+   netlify login
+   netlify deploy --prod --dir=dist
+   ```
+
+3. **Netlify Configuration** (create `netlify.toml` in frontend folder)
+   ```toml
+   [build]
+     command = "npm run build"
+     publish = "dist"
+   
+   [[redirects]]
+     from = "/*"
+     to = "/index.html"
+     status = 200
+   ```
+
+### Backend Deployment (Railway - Recommended)
+
+1. **Prepare Backend**
+   ```bash
+   cd backend
+   npm run build
+   ```
+
+2. **Deploy to Railway**
+   ```bash
+   # Install Railway CLI
+   npm install -g @railway/cli
+   
+   # Login and deploy
+   railway login
+   railway link
+   railway up
+   ```
+
+3. **Railway Configuration** (create `railway.toml` in backend folder)
+   ```toml
+   [build]
+     builder = "nixpacks"
+   
+   [deploy]
+     startCommand = "npm start"
+     restartPolicyType = "on_failure"
+   ```
+
+4. **Set Environment Variables in Railway Dashboard**
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key_here
+   MONGODB_URI=your_mongodb_atlas_connection_string
+   SPOTIFY_CLIENT_ID=your_spotify_client_id
+   SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+   NODE_ENV=production
+   PORT=8080
+   ```
+
+### Backend Deployment (Render Alternative)
+
+1. **Deploy to Render**
+   - Connect your GitHub repo to Render
+   - Select "Web Service"
+   - Set build command: `npm install && npm run build`
+   - Set start command: `npm start`
+   - Set environment variables in Render dashboard
+
+### Backend Deployment (Heroku Alternative)
+
+1. **Create Heroku App**
+   ```bash
+   # Install Heroku CLI
+   heroku login
+   heroku create moodscale-backend
+   ```
+
+2. **Configure Heroku**
+   ```bash
+   # Set environment variables
+   heroku config:set GEMINI_API_KEY=your_key
+   heroku config:set MONGODB_URI=your_connection_string
+   heroku config:set NODE_ENV=production
+   
+   # Deploy
+   git push heroku main
+   ```
+
+3. **Heroku Procfile** (create in backend root)
+   ```
+   web: npm start
+   ```
+
+### Database Setup (MongoDB Atlas)
+
+1. **Create MongoDB Atlas Account** (if not done)
+   - Go to [MongoDB Atlas](https://www.mongodb.com/atlas)
+   - Create free cluster
+   - Get connection string
+
+2. **Configure Network Access**
+   - Add `0.0.0.0/0` for deployment (allow all IPs)
+   - Or add specific deployment platform IPs
+
+### Environment Variables for Production
+
+#### Frontend Environment Variables
 ```env
-GEMINI_API_KEY=your_gemini_api_key_here
-NODE_ENV=production
+# Add to your frontend deployment platform
+VITE_API_URL=https://your-backend-url.railway.app/api
 ```
+
+#### Backend Environment Variables
+```env
+# Add to your backend deployment platform
+GEMINI_API_KEY=your_actual_gemini_api_key
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/moodscale
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+NODE_ENV=production
+PORT=8080
+```
+
+### Post-Deployment Steps
+
+1. **Update Frontend API URL**
+   ```typescript
+   // In frontend/src/services/api.ts
+   const API_BASE_URL = process.env.NODE_ENV === 'production' 
+     ? 'https://your-backend-url.railway.app/api'
+     : 'http://localhost:5000/api';
+   ```
+
+2. **Test Deployment**
+   - Visit your frontend URL
+   - Test all features (mood tracking, AI recommendations, etc.)
+   - Check browser console for errors
+   - Verify API endpoints are working
+
+3. **Configure CORS for Production**
+   ```typescript
+   // In backend/src/index.ts
+   app.use(cors({
+     origin: process.env.NODE_ENV === 'production' 
+       ? ['https://your-frontend-url.vercel.app']
+       : ['http://localhost:5173'],
+     credentials: true
+   }));
+   ```
+
+### Quick Deployment Checklist
+
+- [ ] MongoDB Atlas cluster created and configured
+- [ ] Environment variables set on deployment platforms
+- [ ] Frontend API URL updated for production
+- [ ] CORS configured for production frontend URL
+- [ ] Spotify API credentials configured (if using)
+- [ ] Gemini AI API key set up
+- [ ] Both frontend and backend deployed and accessible
+- [ ] All features tested in production environment
+
+### Recommended Deployment Stack
+- **Frontend**: Vercel (free tier, excellent for React/Vite)
+- **Backend**: Railway (simple deployment, good free tier)
+- **Database**: MongoDB Atlas (free tier available)
+- **AI**: Google Gemini AI (free tier with generous limits)
 
 ## 🎯 MoodScale Integration
 
